@@ -46,7 +46,7 @@ a = model.predict(x_test)
 
 plt.plot(history.history["loss"], label='Funcion de costo')
 plt.legend()
-plt.show()
+
 
 
 plt.figure(figsize=(8, 6))
