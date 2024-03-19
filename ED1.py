@@ -21,31 +21,36 @@ def train_step(model, x):
             tape2.watch(x)
             y_pred = model(x)
         dy_dx = tape2.gradient(y_pred, x)
-        eq = (dy_dx * x) + y_pred + x*x*tf.cos(x)
+        eq = (dy_dx * x) + y_pred + (x*x*tf.cos(x))
         x_o = tf.zeros((batch_size, 1))
         y_o = model(x_o)
-        ic = 0
+        ic = 0.
         loss = loss_function(ic, y_o) + loss_function(0.0, eq)
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
     return loss
 
+def train_step2(model, x):
+    with tf.GradientTape() as tape:
+        y_pred = model(x)
+    dy_dx = tape.gradient(y_pred, x)
+    eq = (dy_dx * x) + y_pred + (x*x*tf.cos(x))
+    x_o = tf.zeros((batch_size, 1))
+    y_o = model(x_o)
+    ic = 0.
+    loss = loss_function(ic, y_o) + loss_function(0.0, eq)
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    return loss
 
 losses = []
 model.compile(optimizer=optimizer, loss=loss_function)
 epochs = 2500
 
 for epoch in range(epochs):
-    #data = np.linspace(-5, 5, num=1000).reshape(-1, 1)
-    #min = tf.cast(tf.reduce_min(data),tf.float32)
-    #max = tf.cast(tf.reduce_max(data),tf.float32)
-    #x = tf.random.uniform(shape=(batch_size, 1), minval=min, maxval=max)
     x_train = x = tf.random.uniform(shape=(batch_size, 1), minval=-5.0, maxval=5.0, dtype=tf.float32)
     loss = train_step(model, x)
     losses.append(loss)
-
-#history = model.fit(x,epochs=500,verbose=0)
-#plt.plot(history.history["loss"])
 
 x_v = np.linspace(-5, 5, 100)
 y_pred_values = model.predict(x_v.reshape(-1, 1))
